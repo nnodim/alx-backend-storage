@@ -9,7 +9,7 @@ from pymongo import MongoClient
 def log_nginx_stats(mongo_collection):
     """provides some stats about Nginx logs
     """
-    total = mongo_collection.count_documents()
+    total = mongo_collection.estimated_document_count()
     print(f"{total} logs")
     
     print("Methods:")
@@ -23,7 +23,6 @@ def log_nginx_stats(mongo_collection):
     print(f"{get_count} status check")
 
 
-
-    if __name__ == "__main__":
-        mongo_collection = MongoClient('mongodb://127.0.0.1:27017').logs.nginx
-        log_nginx_stats(mongo_collection)
+if __name__ == "__main__":
+    mongo_collection = MongoClient('mongodb://127.0.0.1:27017').logs.nginx
+    log_nginx_stats(mongo_collection)
