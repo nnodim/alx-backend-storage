@@ -1,9 +1,27 @@
 #!/usr/bin/env python3
-""" Redis class and its methods"""
+"""
+Redis class
+"""
 import redis
 from uuid import uuid4
 from typing import Union, Callable, Optional
 from functools import wraps
+
+
+def count_calls(method):
+    """
+    A system to count how many times methods of the Cache class are called
+    """
+    key = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """
+        wrapper function
+        """
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
@@ -18,6 +36,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         A store method that takes a data argument and returns a string
