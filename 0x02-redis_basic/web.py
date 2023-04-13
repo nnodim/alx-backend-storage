@@ -8,6 +8,7 @@ from functools import wraps
 
 r = redis.Redis()
 
+
 def cache(method):
     """counter decorator"""
     @wraps(method)
@@ -17,15 +18,16 @@ def cache(method):
         cached_data = r.get(cached_key)
         if cached_data:
             return cached_data.decode('utf-8')
-        
+
         count_key = "count:" + url
         html = method(url)
 
         r.incr(count_key)
-        r.set(cached_key, html)
+        r.set(cached_key, html, ex=10)
         r.expire(cached_key, 10)
         return html
     return wrapper
+
 
 @cache
 def get_page(url: str) -> str:
@@ -34,3 +36,7 @@ def get_page(url: str) -> str:
     """
     response = requests.get(url)
     return response.text
+
+
+if __name__ == "__main__":
+    get_page('http://slowwly.robertomurray.co.uk')
