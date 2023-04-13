@@ -50,7 +50,6 @@ def replay(func):
     cache = redis.Redis()
     func_name = func.__qualname__
     calls = cache.get(func_name)
-
     try:
         calls = int(calls.decode("utf-8"))
     except Exception:
@@ -67,7 +66,7 @@ def replay(func):
             outp = outp.decode("utf-8")
         except Exception:
             outp = ""
-        print(f"{func_name}(*({inp},)) -> {out}")
+        print(f"{func_name}(*{inp}) -> {out}")
 
 
 class Cache:
