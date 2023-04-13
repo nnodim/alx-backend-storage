@@ -23,7 +23,7 @@ def cache(method):
         html = method(url)
 
         r.incr(count_key)
-        r.set(cached_key, html, ex=10)
+        r.set(cached_key, html)
         r.expire(cached_key, 10)
         return html
     return wrapper
