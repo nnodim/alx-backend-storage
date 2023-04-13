@@ -25,3 +25,30 @@ class Cache:
         randomKey = str(uuid4())
         self._redis.set(randomKey, data)
         return randomKey
+
+    def get(self, key, fn=None):
+        """
+        A get method that take a key string argument and
+        an optional Callable argument named fn.
+        """
+        value = self._redis.get(key)
+        if fn:
+            value = fn(value)
+        return value
+
+    def get_str(self, key):
+        """
+        parametrize Cache.get with the correct
+        conversion function
+        """
+        value = self._redis.get(key)
+        return value.decode('utf-8')
+
+    def get_int(self, key):
+        """
+        parametrize Cache.get with the correct
+        conversion function
+        """
+        value = self._redis.get(key)
+        return value.decode('utf-8')
+
