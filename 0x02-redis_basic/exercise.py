@@ -8,7 +8,7 @@ from typing import Union, Callable, Optional
 from functools import wraps
 
 
-def count_calls(method):
+def count_calls(method: Callable) -> Callable:
     """
     A system to count how many times methods of the Cache class are called
     """
@@ -24,6 +24,24 @@ def count_calls(method):
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """
+    A call_history decorator to store the
+    history of inputs and outputs for a particular function.
+    """
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """
+        wrapper function
+        """
+        input = str(args)
+        self._redis.rpush(method.__qualname__ + ":inputs", input)
+        output = str(method(self, *args, **kwargs))
+        self._redis.rpush(method.__qualname__ + ":outputs", output)
+        return output
+    return wrapper
+
+
 class Cache:
     """
     A simple cache class using Redis.
@@ -36,6 +54,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
@@ -45,7 +64,7 @@ class Cache:
         self._redis.set(randomKey, data)
         return randomKey
 
-    def get(self, key, fn=None):
+    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
         """
         A get method that take a key string argument and
         an optional Callable argument named fn.
@@ -55,7 +74,7 @@ class Cache:
             value = fn(value)
         return value
 
-    def get_str(self, key):
+    def get_str(self, key: str) -> str:
         """
         parametrize Cache.get with the correct
         conversion function
@@ -63,11 +82,10 @@ class Cache:
         value = self._redis.get(key)
         return value.decode('utf-8')
 
-    def get_int(self, key):
+    def get_int(self, key: str) -> int:
         """
         parametrize Cache.get with the correct
         conversion function
         """
         value = self._redis.get(key)
         return value.decode('utf-8')
-
